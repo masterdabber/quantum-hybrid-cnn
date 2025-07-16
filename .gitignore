@@ -1,0 +1,7 @@
+proj2env/
+.ipynb_checkpoints/
+__pycache__/
+*.pth
+*.log
+*.tar.gz
+useless_data_deleteLater/
