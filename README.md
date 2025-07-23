@@ -58,7 +58,7 @@ The core of this project is a three-stage hybrid architecture:
 
 2. Quantum Circuit  
    - The quantum layer uses a 4-qubit variational circuit:
-     - AmplitudeEmbedding or RY embedding
+     - RY embedding
      - Multiple entangling layers of CNOT gates
      - Expectation values of Pauli-Z measurements
    - Implemented with PennyLane and wrapped in a `qml.qnode`
@@ -86,7 +86,7 @@ The core of this project is a three-stage hybrid architecture:
 
 ## Key Quantum Techniques Used
 
-- AmplitudeEmbedding and RY rotations
+- AngleEmbedding and RY rotations
 - Variational quantum circuit layers with CNOT entanglement
 - Hybrid gradient flow (autograd support via PennyLane)
 - Expectation value measurements for quantum-classical interfacing
