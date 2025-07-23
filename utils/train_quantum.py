@@ -42,8 +42,8 @@ valid_transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-train_set = datasets.CIFAR10(root='../data', train=True, download=True, transform=train_transform)
-test_set = datasets.CIFAR10(root='../data', train=False, download=True, transform=valid_transform)
+train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
+test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=valid_transform)
 img_datasets = {'train': train_set, 'val': test_set}
 
 
