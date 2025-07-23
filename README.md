@@ -34,22 +34,29 @@ The core of this project is a three-stage hybrid architecture:
 
 ## Setup
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/quantum_cnn_project.git
-   cd quantum_cnn_project
-   ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/quantum_cnn_project.git
+cd quantum_cnn_project
 
-2. Create and activate a virtual environment:
-   ```
-   python -m venv proj2env
-   source proj2env/bin/activate   # or proj2env\Scripts\activate on Windows
-   ```
+# 2. Create a virtual environment (cross-platform)
+python -m venv hybrid_cnn
 
-3. Install dependencies:
-   ```
-   pip install torch torchvision pennylane matplotlib seaborn scikit-learn
-   ```
+# 3. Activate the virtual environment
+# On Windows:
+./hybrid_cnn/Scripts/activate
+
+# On macOS/Linux:
+# source hybrid_cnn/bin/activate
+
+# 4. Upgrade pip and install core dependencies
+pip install --upgrade pip
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install pennylane matplotlib seaborn scikit-learn
+
+# 5. (Optional) Verify GPU support
+python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
+```
 
 ## Training Pipeline
 
