@@ -27,33 +27,28 @@ class DeviceDataLoader:
             yield to_device(b, self.device)
     def __len__(self):
         return len(self.dl)
-
 train_transform = transforms.Compose([
     transforms.RandomResizedCrop(224),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
-
 valid_transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
-
-train_set = datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
-test_set = datasets.CIFAR10(root='./data', train=False, download=True, transform=valid_transform)
+train_set = datasets.CIFAR10(root='../data', train=True, download=True, transform=train_transform)
+test_set = datasets.CIFAR10(root='../data', train=False, download=True, transform=valid_transform)
 img_datasets = {'train': train_set, 'val': test_set}
 
-
 dataloaders = {
-    x: DeviceDataLoader(torch.utils.data.DataLoader(img_datasets[x], batch_size=64, shuffle=True), get_default_device())
+    x: DeviceDataLoader(torch.utils.data.DataLoader(img_datasets[x], batch_size=256, shuffle=True), get_default_device())
     for x in ['train', 'val']
 }
 dataset_sizes = {x: len(img_datasets[x]) for x in ['train', 'val']}
 class_names = img_datasets['train'].classes
-
 
 resnet = models.resnet18(weights='IMAGENET1K_V1')
 for param in resnet.parameters():
@@ -62,39 +57,45 @@ resnet.fc = nn.Identity()
 resnet = resnet.to(get_default_device())
 resnet.eval()
 
-
 model = DressedQuantumNet().to(get_default_device())
 loss_fn = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
 
 def train_model(model, loss_fn, optimizer, scheduler, num_epochs=15):
+    #counter = 0
     best_model_path = 'models/resnet18_best.pth'
     best_acc = 0.0
 
     for epoch in range(num_epochs):
         for phase in ['train', 'val']:
-            model.train() if phase == 'train' else model.eval()
+            if phase == 'train':
+                model.train()
+            else:
+                model.eval()
             running_loss, running_corrects = 0.0, 0
-
             for inputs, labels in dataloaders[phase]:
                 with torch.no_grad():
                     features = resnet(inputs)
+
                 optimizer.zero_grad()
                 with torch.set_grad_enabled(phase == 'train'):
+                    #print("here5")
                     outputs = model(features)
                     _, preds = torch.max(outputs, 1)
                     loss = loss_fn(outputs, labels)
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
-                
+                        #counter += 1
+                        #print(f"Counter: {counter}")
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
-                break
+            #print("here7")
             if phase == 'train':
                 scheduler.step()
+            #print("here8")
 
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects.double() / dataset_sizes[phase]
@@ -102,7 +103,7 @@ def train_model(model, loss_fn, optimizer, scheduler, num_epochs=15):
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 torch.save(model.state_dict(), best_model_path)
-
+        print(f"Best accuracy: {best_acc}")
     model.load_state_dict(torch.load(best_model_path))
     return model
 
@@ -129,8 +130,9 @@ def evaluate_model(model):
 
 
 if __name__ == "__main__":
+    #print(len(dataloaders['train']))
     #print(get_default_device())
-    trained_model = train_model(model, loss_fn, optimizer, scheduler, num_epochs=1)
+    trained_model = train_model(model, loss_fn, optimizer, scheduler, num_epochs=15)
     evaluate_model(trained_model)
 
 

@@ -20,9 +20,8 @@ class DressedQuantumNet(nn.Module):
 
         q_out = []
         for elem in q_in:
-            # Make sure the output is a Tensor
             q_result = torch.tensor(quantum_net(elem, self.q_params), device=elem.device, dtype=torch.float32)
             q_out.append(q_result)
 
-        q_out = torch.stack(q_out)  # Now this will work
+        q_out = torch.stack(q_out)
         return self.post_net(q_out)
